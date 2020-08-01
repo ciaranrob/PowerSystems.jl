@@ -408,6 +408,25 @@ end
     )
     @test Gen2AVR isa PowerSystems.Component
 
+    Gen2_reset = DynamicGenerator(
+        static_injector = static_gen,
+        ω_ref = 1.0,
+        machine = oneDoneQ,
+        shaft = BaseShaft,
+        avr = proportional_avr,
+        prime_mover = fixed_tg,
+        pss = no_pss,
+    )
+
+    original_state_count = get_n_states(Gen2_reset)
+
+    set_machine!(Gen2_reset, SalientPoleQuadratic(nothing))
+    set_avr!(Gen2_reset, AVRTypeII(nothing))
+    set_shaft!(Gen2_reset, FiveMassShaft(nothing))
+    set_prime_mover!(Gen2_reset, TGTypeII(nothing))
+
+    @test get_n_states(Gen2_reset) > original_state_count
+
     sys = System(100)
     for bus in nodes_OMIB
         add_component!(sys, bus)

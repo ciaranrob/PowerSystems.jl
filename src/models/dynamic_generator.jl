@@ -89,3 +89,52 @@ get_ext(device::DynamicGenerator) = device.ext
 get_internal(device::DynamicGenerator) = device.internal
 get_V_ref(value::DynamicGenerator) = get_V_ref(get_avr(value))
 get_P_ref(value::DynamicGenerator) = get_P_ref(get_prime_mover(value))
+
+set_ω_ref!(device::DynamicGenerator, val::Float64) = device.ω_ref = val
+
+function update_indexing!(device::DynamicGenerator)
+    device.n_states = (
+        get_n_states(device.machine) +
+        get_n_states(device.shaft) +
+        get_n_states(device.avr) +
+        get_n_states(device.prime_mover) +
+        get_n_states(device.pss)
+    )
+    device.states = vcat(
+        get_states(device.machine),
+        get_states(device.shaft),
+        get_states(device.avr),
+        get_states(device.prime_mover),
+        get_states(device.pss),
+    )
+    return
+end
+
+function set_machine!(device::DynamicGenerator, val::Machine)
+    device.machine = val
+    update_indexing!(device)
+    return
+end
+
+function set_shaft!(device::DynamicGenerator, val::Shaft)
+    device.shaft = val
+    update_indexing!(device)
+    return
+end
+
+function set_avr!(device::DynamicGenerator, val::AVR)
+    device.avr = val
+    update_indexing!(device)
+    return
+end
+function set_prime_mover!(device::DynamicGenerator, val::TurbineGov)
+    device.prime_mover = val
+    update_indexing!(device)
+    return
+end
+
+function set_pss!(device::DynamicGenerator, val::PSS)
+    device.pss = val
+    update_indexing!(device)
+    return
+end

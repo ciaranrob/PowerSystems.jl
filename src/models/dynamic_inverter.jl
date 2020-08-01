@@ -42,21 +42,21 @@ function DynamicInverter(
 }
 
     n_states = (
-        converter.n_states +
-        outer_control.n_states +
-        inner_control.n_states +
-        dc_source.n_states +
-        freq_estimator.n_states +
-        filter.n_states
+        get_n_states(converter) +
+        get_n_states(outer_control) +
+        get_n_states(inner_control) +
+        get_n_states(dc_source) +
+        get_n_states(freq_estimator) +
+        get_n_states(filter)
     )
 
     states = vcat(
-        converter.states,
-        outer_control.states,
-        inner_control.states,
-        dc_source.states,
-        freq_estimator.states,
-        filter.states,
+        get_states(converter),
+        get_states(outer_control),
+        get_states(inner_control),
+        get_states(dc_source),
+        get_states(freq_estimator),
+        get_states(filter),
     )
 
     return DynamicInverter{C, O, IC, DC, P, F}(
@@ -124,3 +124,62 @@ get_static_injector(device::DynamicInverter) = device.static_injector
 get_internal(device::DynamicInverter) = device.internal
 get_P_ref(value::DynamicInverter) = get_P_ref(get_active_power(get_outer_control(value)))
 get_V_ref(value::DynamicInverter) = get_V_ref(get_reactive_power(get_outer_control(value)))
+
+set_ω_ref!(device::DynamicInverter, val::Float64) = device.ω_ref = val
+
+function update_indexing!(device::DynamicInverter)
+    device.n_states = (
+        get_n_states(device.converter) +
+        get_n_states(device.outer_control) +
+        get_n_states(device.inner_control) +
+        get_n_states(device.dc_source) +
+        get_n_states(device.freq_estimator) +
+        get_n_states(device.filter)
+    )
+
+    device.states = vcat(
+        get_states(device.converter),
+        get_states(device.outer_control),
+        get_states(device.inner_control),
+        get_states(device.dc_source),
+        get_states(device.freq_estimator),
+        get_states(device.filter),
+    )
+    return
+end
+
+function set_converter!(device::DynamicInverter, val::Converter)
+    device.converter = val
+    update_indexing!(device)
+    return
+end
+
+function set_outer_control!(device::DynamicInverter, val::OuterControl)
+    device.outer_control = val
+    update_indexing!(device)
+    return
+end
+
+function set_inner_control!(device::DynamicInverter, val::InnerControl)
+    device.inner_control = val
+    update_indexing!(device)
+    return
+end
+
+function set_dc_source!(device::DynamicInverter, val::DCSource)
+    device.dc_source = val
+    update_indexing!(device)
+    return
+end
+
+function set_freq_estimator!(device::DynamicInverter, val::FrequencyEstimator)
+    device.freq_estimator = val
+    update_indexing!(device)
+    return
+end
+
+function set_filter!(device::DynamicInverter, val::Filter)
+    device.filter = val
+    update_indexing!(device)
+    return
+end
